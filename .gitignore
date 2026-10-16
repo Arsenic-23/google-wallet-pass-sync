@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+dist/
+
+# Environment and sensitive keys
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+credentials/service-account.json
+credentials/*.json
+!credentials/service-account.example.json
+
+# Local database / data store
+data/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db

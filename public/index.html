@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Wallet Digital Pass</title>
+  <meta name="description" content="Issue digital passes to Google Wallet and update them live on Android devices.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- Minimalist Header -->
+    <header class="header">
+      <div class="header-content">
+        <div class="logo-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="5" width="20" height="14" rx="3"/>
+            <line x1="2" y1="10" x2="22" y2="10"/>
+          </svg>
+        </div>
+        <div>
+          <h1>Google Wallet Pass</h1>
+          <p>Issue digital passes and update them live on Android devices</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Simple Main Grid -->
+    <main class="grid">
+      
+      <!-- Left Column: Actions -->
+      <section class="left-panel">
+        
+        <!-- 1. Create Pass -->
+        <div class="panel-card" id="card-create">
+          <div class="card-title-row">
+            <span class="badge-step">1</span>
+            <h2>Create Pass</h2>
+          </div>
+
+          <form id="create-pass-form">
+            <div class="field">
+              <label for="input-name">Name</label>
+              <input type="text" id="input-name" class="input" placeholder="e.g. Alex Morgan" required autocomplete="name">
+            </div>
+
+            <div class="field">
+              <label for="input-label">Label</label>
+              <input type="text" id="input-label" class="input" placeholder="e.g. Balance" required>
+            </div>
+
+            <div class="field">
+              <label for="input-value">Number / Value</label>
+              <input type="number" id="input-value" class="input" placeholder="e.g. 40" required>
+            </div>
+
+            <button type="submit" id="btn-create" class="btn btn-primary">
+              <span id="spinner-create" class="spinner" style="display:none;"></span>
+              <span>Create Digital Pass</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- 2. Live Update (POST /passes/{id}) -->
+        <div class="panel-card update-panel" id="card-update">
+          <div class="card-title-row">
+            <span class="badge-step step-green">2</span>
+            <h2>Live Update</h2>
+          </div>
+
+          <p class="section-desc">
+            Calls <code>POST /passes/{id}</code> to update the pass live on the phone.
+          </p>
+
+          <div id="no-pass-hint" class="hint-box">
+            Create a pass above to enable live device updates.
+          </div>
+
+          <div id="update-controls" style="display: none;">
+            <div class="active-pass-pill">
+              <span>Pass ID:</span>
+              <code id="active-pass-id">-</code>
+            </div>
+
+            <form id="update-pass-form">
+              <div class="field">
+                <label for="input-new-value">New Value</label>
+                <input type="number" id="input-new-value" class="input" placeholder="e.g. 55" required>
+              </div>
+
+              <button type="submit" id="btn-update" class="btn btn-success">
+                <span id="spinner-update" class="spinner" style="display:none;"></span>
+                <span>Update Pass Live</span>
+              </button>
+            </form>
+
+            <div id="update-alert" class="alert-box" style="display: none;"></div>
+
+            <!-- Terminal cURL Command -->
+            <div class="curl-box">
+              <div class="curl-header">
+                <span>cURL Endpoint:</span>
+                <button type="button" class="btn-copy" id="btn-copy-curl" onclick="copyCurl()">Copy</button>
+              </div>
+              <pre><code id="curl-snippet"></code></pre>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Right Column: Pass Preview & Save Button -->
+      <section class="right-panel">
+        <div class="panel-card preview-card">
+          <div class="preview-header">
+            <h2>Wallet Pass Preview</h2>
+            <span class="preview-tag">Google Wallet</span>
+          </div>
+
+          <!-- Digital Pass Card Element -->
+          <div class="pass-card" id="pass-card">
+            <div class="pass-card-top">
+              <div class="pass-brand">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                </svg>
+                <span>Digital Pass</span>
+              </div>
+              <span class="pass-type">PASS</span>
+            </div>
+
+            <div class="pass-holder-name" id="preview-name">Cardholder Name</div>
+
+            <div class="pass-metric">
+              <div class="metric-info">
+                <span class="metric-label" id="preview-label">BALANCE</span>
+                <span class="metric-sub">Live synced field</span>
+              </div>
+              <div class="metric-number" id="preview-value">40</div>
+            </div>
+
+            <!-- QR Code Section -->
+            <div class="pass-qr-box">
+              <img id="preview-qr" class="qr-img" src="" alt="Pass QR Code">
+              <div class="qr-label" id="preview-id">7K9P-4X2B</div>
+            </div>
+          </div>
+
+          <!-- Save to Google Wallet Button Container -->
+          <div class="save-actions" id="save-actions" style="display: none;">
+            <a id="save-link" class="google-wallet-btn" href="#" target="_blank" rel="noopener noreferrer">
+              <img src="/assets/save-to-google-wallet.svg" alt="Save to Google Wallet">
+            </a>
+
+            <button type="button" class="btn-text" onclick="copySaveLink()">
+              🔗 Copy Save Link
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Recent Passes Section -->
+    <section class="history-section">
+      <div class="panel-card">
+        <div class="history-header">
+          <h3>Issued Passes</h3>
+          <button class="btn-refresh" onclick="loadPasses()">Refresh</button>
+        </div>
+
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Label</th>
+                <th>Value</th>
+                <th>Pass ID</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="passes-tbody">
+              <tr>
+                <td colspan="5" class="table-empty">No passes created yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
