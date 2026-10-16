@@ -4,9 +4,11 @@ services:
     container_name: google-wallet-app
     restart: unless-stopped
     ports:
+      - "80:3001"
       - "3001:3001"
     env_file:
       - .env
     volumes:
       - ./data:/app/data
       - ./credentials:/app/credentials
+
