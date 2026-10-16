@@ -84,10 +84,82 @@ body {
 }
 
 @media (max-width: 820px) {
+  body {
+    padding: 16px 12px 48px;
+  }
+
+  .header {
+    margin-bottom: 20px;
+  }
+
+  .header h1 {
+    font-size: 1.25rem;
+  }
+
+  .header p {
+    font-size: 0.82rem;
+  }
+
   .grid {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .left-panel,
+  .right-panel {
+    display: contents;
+  }
+
+  #card-create {
+    order: 1;
+  }
+
+  .preview-card {
+    order: 2;
+    margin-bottom: 16px;
+  }
+
+  #card-update {
+    order: 3;
+  }
+
+  .panel-card {
+    padding: 18px 14px;
+    margin-bottom: 16px;
+    border-radius: var(--radius-md);
+  }
+
+  .pass-card {
+    max-width: 100%;
+    padding: 18px 16px;
+    border-radius: 16px;
+  }
+
+  .pass-holder-name {
+    font-size: 1.25rem;
+  }
+
+  .metric-number {
+    font-size: 1.45rem;
+  }
+
+  .qr-img {
+    width: 130px;
+    height: 130px;
+  }
+
+  .input {
+    font-size: 16px;
+  }
+
+  .table th,
+  .table td {
+    padding: 10px 8px;
+    font-size: 0.78rem;
   }
 }
+
 
 .panel-card {
   background: var(--bg-card);

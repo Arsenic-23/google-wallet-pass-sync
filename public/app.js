@@ -121,7 +121,12 @@ async function handleUpdatePass(e) {
 
     updateCurl(currentPass.id, newValue);
     await loadPasses();
+
+    if (window.innerWidth <= 820) {
+      document.getElementById('pass-card')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
   } catch (err) {
+
     alertBox.className = 'alert-box error';
     alertBox.textContent = `Update Failed: ${err.message}`;
     alertBox.style.display = 'block';
@@ -153,6 +158,12 @@ function setActivePass(pass) {
   updateCurl(pass.id, 55);
 
   document.getElementById('update-alert').style.display = 'none';
+
+  if (window.innerWidth <= 820) {
+    setTimeout(() => {
+      document.getElementById('pass-card')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 100);
+  }
 }
 
 function updateCurl(passId, value) {
@@ -162,6 +173,7 @@ function updateCurl(passId, value) {
   -d '{"value": ${value}}'`;
   document.getElementById('curl-snippet').textContent = snippet;
 }
+
 
 async function loadPasses() {
   const tbody = document.getElementById('passes-tbody');
