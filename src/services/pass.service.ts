@@ -4,10 +4,6 @@ import { IPassRepository } from '../domain/repositories/pass-repository.interfac
 import { CreatePassDto, PassEntity, UpdatePassDto } from '../domain/models/pass.model.js';
 import { IWalletProvider, ProviderHealth } from '../providers/wallet-provider.interface.js';
 
-/**
- * Generates an 8-character uppercase alphanumeric pass ID (e.g. 7K9P-4X2B).
- * Excludes easily confusable characters (0, O, 1, I) for readability.
- */
 export function generatePassId(): string {
   const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
   const bytes = crypto.randomBytes(8);
@@ -24,9 +20,6 @@ export class PassService {
     private passRepository: IPassRepository
   ) {}
 
-  /**
-   * Creates a digital pass and registers it with the wallet provider.
-   */
   async createPass(dto: CreatePassDto): Promise<PassEntity> {
     if (!dto.name || !dto.name.trim()) {
       throw new Error('Name is required');
@@ -38,10 +31,8 @@ export class PassService {
       throw new Error('Value/number is required');
     }
 
-    // Clean, professional pass ID (e.g. 7K9P-4X2B)
     const passId = generatePassId();
 
-    // Generate QR code data URL for visual web display
     const qrCodeDataUrl = await QRCode.toDataURL(passId, {
       margin: 2,
       width: 280,
@@ -51,7 +42,6 @@ export class PassService {
       },
     });
 
-    // Delegate creation to the wallet provider abstraction
     const walletResult = await this.walletProvider.createPass({
       id: passId,
       name: dto.name.trim(),
@@ -77,9 +67,6 @@ export class PassService {
     return passEntity;
   }
 
-  /**
-   * Updates an existing pass's value and synchronizes live with the wallet provider.
-   */
   async updatePass(id: string, dto: UpdatePassDto): Promise<PassEntity> {
     if (dto.value === undefined || dto.value === null || dto.value === '') {
       throw new Error('Value is required for pass update');
@@ -90,7 +77,6 @@ export class PassService {
       throw new Error(`Pass with ID "${id}" was not found`);
     }
 
-    // Call the wallet provider to push live update to the digital pass on user's phone
     await this.walletProvider.updatePass({
       id: pass.id,
       name: pass.name,
@@ -98,7 +84,6 @@ export class PassService {
       value: dto.value,
     });
 
-    // Update in local repository
     const updatedPass = await this.passRepository.update(id, {
       value: dto.value,
     });

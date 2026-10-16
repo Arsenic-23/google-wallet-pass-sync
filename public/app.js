@@ -12,21 +12,17 @@ function initLivePreviewDefaults() {
   document.getElementById('preview-value').textContent = '40';
   document.getElementById('preview-id').textContent = '7K9P-4X2B';
 
-  // Default clean QR code preview graphic
   document.getElementById('preview-qr').src =
     'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 150 150"><rect width="150" height="150" fill="%23ffffff"/><path d="M15 15h40v40h-40zM25 25h20v20h-20zM95 15h40v40h-40zM105 25h20v20h-20zM15 95h40v40h-40zM25 105h20v20h-20zM65 25h10v10h-10zM75 45h10v20h-10zM45 65h20v10h-20zM75 75h10v10h-10zM95 75h10v20h-10zM115 65h20v10h-20zM65 95h20v10h-20zM95 105h30v10h-30zM65 125h10v10h-10zM85 125h20v10h-20zM115 125h20v10h-20z" fill="%231e293b"/></svg>';
 }
 
 function setupEventListeners() {
-  // Create pass
   const createForm = document.getElementById('create-pass-form');
   createForm.addEventListener('submit', handleCreatePass);
 
-  // Update pass
   const updateForm = document.getElementById('update-pass-form');
   updateForm.addEventListener('submit', handleUpdatePass);
 
-  // Live card reflection while typing
   document.getElementById('input-name').addEventListener('input', (e) => {
     document.getElementById('preview-name').textContent = e.target.value.trim() || 'Cardholder Name';
   });
@@ -40,7 +36,6 @@ function setupEventListeners() {
   });
 }
 
-// 1. Create Digital Pass
 async function handleCreatePass(e) {
   e.preventDefault();
 
@@ -78,7 +73,6 @@ async function handleCreatePass(e) {
   }
 }
 
-// 2. Live Update (POST /passes/:id)
 async function handleUpdatePass(e) {
   e.preventDefault();
 
@@ -116,13 +110,11 @@ async function handleUpdatePass(e) {
 
     currentPass = data.pass;
 
-    // Visual pulse animation on card
     const metricElem = document.getElementById('preview-value');
     metricElem.textContent = String(newValue);
     metricElem.classList.add('pulse');
     setTimeout(() => metricElem.classList.remove('pulse'), 900);
 
-    // Feedback message
     alertBox.className = 'alert-box success';
     alertBox.innerHTML = `<strong>Pass Live Updated:</strong> ${currentPass.label} is now <strong>${newValue}</strong>. Android device updated live without re-adding.`;
     alertBox.style.display = 'block';
@@ -141,7 +133,6 @@ async function handleUpdatePass(e) {
 function setActivePass(pass) {
   currentPass = pass;
 
-  // Update card face
   document.getElementById('preview-name').textContent = pass.name;
   document.getElementById('preview-label').textContent = pass.label.toUpperCase();
   document.getElementById('preview-value').textContent = String(pass.value);
@@ -150,17 +141,14 @@ function setActivePass(pass) {
     document.getElementById('preview-qr').src = pass.qrCodeDataUrl;
   }
 
-  // Show "Save to Google Wallet" button
   const saveLink = document.getElementById('save-link');
   saveLink.href = pass.saveUrl;
   document.getElementById('save-actions').style.display = 'flex';
 
-  // Enable Live Update controls
   document.getElementById('no-pass-hint').style.display = 'none';
   document.getElementById('update-controls').style.display = 'block';
   document.getElementById('active-pass-id').textContent = pass.id;
 
-  // Default update value input to 55
   document.getElementById('input-new-value').value = '55';
   updateCurl(pass.id, 55);
 

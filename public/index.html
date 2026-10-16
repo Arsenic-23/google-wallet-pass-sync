@@ -7,13 +7,11 @@
   <meta name="description" content="Issue digital passes to Google Wallet and update them live on Android devices.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
   <div class="app-container">
-    
-    <!-- Minimalist Header -->
     <header class="header">
       <div class="header-content">
         <div class="logo-mark">
@@ -29,13 +27,8 @@
       </div>
     </header>
 
-    <!-- Simple Main Grid -->
     <main class="grid">
-      
-      <!-- Left Column: Actions -->
       <section class="left-panel">
-        
-        <!-- 1. Create Pass -->
         <div class="panel-card" id="card-create">
           <div class="card-title-row">
             <span class="badge-step">1</span>
@@ -65,7 +58,6 @@
           </form>
         </div>
 
-        <!-- 2. Live Update (POST /passes/{id}) -->
         <div class="panel-card update-panel" id="card-update">
           <div class="card-title-row">
             <span class="badge-step step-green">2</span>
@@ -100,7 +92,6 @@
 
             <div id="update-alert" class="alert-box" style="display: none;"></div>
 
-            <!-- Terminal cURL Command -->
             <div class="curl-box">
               <div class="curl-header">
                 <span>cURL Endpoint:</span>
@@ -110,10 +101,8 @@
             </div>
           </div>
         </div>
-
       </section>
 
-      <!-- Right Column: Pass Preview & Save Button -->
       <section class="right-panel">
         <div class="panel-card preview-card">
           <div class="preview-header">
@@ -121,7 +110,6 @@
             <span class="preview-tag">Google Wallet</span>
           </div>
 
-          <!-- Digital Pass Card Element -->
           <div class="pass-card" id="pass-card">
             <div class="pass-card-top">
               <div class="pass-brand">
@@ -143,14 +131,12 @@
               <div class="metric-number" id="preview-value">40</div>
             </div>
 
-            <!-- QR Code Section -->
             <div class="pass-qr-box">
               <img id="preview-qr" class="qr-img" src="" alt="Pass QR Code">
               <div class="qr-label" id="preview-id">7K9P-4X2B</div>
             </div>
           </div>
 
-          <!-- Save to Google Wallet Button Container -->
           <div class="save-actions" id="save-actions" style="display: none;">
             <a id="save-link" class="google-wallet-btn" href="#" target="_blank" rel="noopener noreferrer">
               <img src="/assets/save-to-google-wallet.svg" alt="Save to Google Wallet">
@@ -162,10 +148,8 @@
           </div>
         </div>
       </section>
-
     </main>
 
-    <!-- Recent Passes Section -->
     <section class="history-section">
       <div class="panel-card">
         <div class="history-header">
@@ -193,7 +177,6 @@
         </div>
       </div>
     </section>
-
   </div>
 
   <script src="/app.js"></script>

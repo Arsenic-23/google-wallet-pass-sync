@@ -4,10 +4,6 @@ import { PassService } from '../services/pass.service.js';
 export class PassController {
   constructor(private passService: PassService) {}
 
-  /**
-   * POST /passes
-   * Creates a new digital pass
-   */
   createPass = async (req: Request, res: Response): Promise<void> => {
     try {
       const { name, label, value } = req.body;
@@ -15,7 +11,7 @@ export class PassController {
       if (!name || !label || value === undefined) {
         res.status(400).json({
           success: false,
-          error: 'Missing required fields: "name", "label", and "value" are required.',
+          error: 'Missing required fields: name, label, and value are required.',
         });
         return;
       }
@@ -36,10 +32,6 @@ export class PassController {
     }
   };
 
-  /**
-   * POST /passes/:id
-   * Updates an existing pass and triggers live update to Google Wallet
-   */
   updatePass = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = String(req.params.id);
@@ -48,18 +40,16 @@ export class PassController {
       if (value === undefined || value === null) {
         res.status(400).json({
           success: false,
-          error: 'Missing required field: "value" is required.',
+          error: 'Missing required field: value is required.',
         });
         return;
       }
-
-      console.log(`📩 Received POST /passes/${id} with value:`, value);
 
       const updatedPass = await this.passService.updatePass(id, { value });
 
       res.status(200).json({
         success: true,
-        message: `Pass ${id} updated successfully. Live push sent to Google Wallet.`,
+        message: `Pass ${id} updated successfully`,
         pass: updatedPass,
       });
     } catch (err: any) {
@@ -73,9 +63,6 @@ export class PassController {
     }
   };
 
-  /**
-   * GET /passes/:id
-   */
   getPass = async (req: Request, res: Response): Promise<void> => {
     try {
       const id = String(req.params.id);
@@ -101,9 +88,6 @@ export class PassController {
     }
   };
 
-  /**
-   * GET /passes
-   */
   listPasses = async (_req: Request, res: Response): Promise<void> => {
     try {
       const passes = await this.passService.listPasses();
@@ -119,9 +103,6 @@ export class PassController {
     }
   };
 
-  /**
-   * GET /api/status
-   */
   getStatus = async (_req: Request, res: Response): Promise<void> => {
     try {
       const health = await this.passService.getProviderStatus();

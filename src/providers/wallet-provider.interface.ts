@@ -27,11 +27,6 @@ export interface ProviderHealth {
   details?: string;
 }
 
-/**
- * Universal Wallet Provider interface.
- * Decouples core business/pass management logic from specific wallet platforms
- * (Google Wallet, Apple Wallet, etc.)
- */
 export interface IWalletProvider {
   readonly providerName: string;
   readonly isMock: boolean;

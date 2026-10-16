@@ -24,7 +24,6 @@ function resolveServiceAccount(): {
   clientEmail?: string;
   privateKey?: string;
 } {
-  // Option 1: Direct JSON string in env
   if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
     try {
       const parsed = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
@@ -32,12 +31,11 @@ function resolveServiceAccount(): {
         clientEmail: parsed.client_email,
         privateKey: parsed.private_key,
       };
-    } catch (e) {
-      console.warn('⚠️ GOOGLE_SERVICE_ACCOUNT_JSON could not be parsed as valid JSON');
+    } catch {
+      console.warn('Could not parse GOOGLE_SERVICE_ACCOUNT_JSON');
     }
   }
 
-  // Option 2: Direct env variables
   if (process.env.GOOGLE_CLIENT_EMAIL && process.env.GOOGLE_PRIVATE_KEY) {
     return {
       clientEmail: process.env.GOOGLE_CLIENT_EMAIL,
@@ -45,7 +43,6 @@ function resolveServiceAccount(): {
     };
   }
 
-  // Option 3: Credentials file path (default or custom)
   const defaultPath = path.resolve(process.cwd(), 'credentials/service-account.json');
   const specifiedPath = process.env.GOOGLE_APPLICATION_CREDENTIALS 
     ? path.resolve(process.cwd(), process.env.GOOGLE_APPLICATION_CREDENTIALS)
@@ -60,8 +57,8 @@ function resolveServiceAccount(): {
         clientEmail: parsed.client_email,
         privateKey: parsed.private_key,
       };
-    } catch (e) {
-      console.warn(`⚠️ Could not parse service account file at: ${specifiedPath}`);
+    } catch {
+      console.warn(`Could not parse service account file at: ${specifiedPath}`);
     }
   }
 

@@ -1,37 +1,36 @@
-# Google Wallet Digital Pass & Live Sync Studio
+# Google Wallet Pass Sync
 
-A minimal full-stack web application that issues digital passes to Google Wallet and enables **instant live updates** of installed passes on Android devices via the Google Wallet REST API.
+A full-stack application that issues digital passes to Google Wallet and updates them live on Android devices via the Google Wallet REST API.
 
 ---
 
-## 🌟 Key Features
+## Features
 
-1. **Clean Provider Pattern Architecture**:
-   - `WalletProvider` interface completely decouples business logic from Google Wallet.
-   - Core application logic (`PassService`) can support future providers (e.g., Apple Wallet) without rewriting any pass management logic.
+1. **Provider Pattern Architecture**:
+   - `WalletProvider` interface decouples domain logic from Google Wallet.
+   - Core application logic (`PassService`) can support additional providers (such as Apple Wallet) without changes to pass management.
 2. **Google Wallet Pass Generation**:
-   - Generates Google Wallet generic pass classes and objects with user name, custom label, dynamic value, and a scannable QR code.
-   - Generates RS256 cryptographically signed Google Wallet Save links (`https://pay.google.com/gp/v/save/{jwt}`).
+   - Generates Google Wallet generic pass classes and objects with holder name, custom field label, value, and scannable QR code.
+   - Generates RS256 signed Google Wallet Save links (`https://pay.google.com/gp/v/save/{jwt}`).
 3. **Live Pass Updates (`POST /passes/{id}`)**:
-   - Updates pass values on the backend and immediately pushes the update to Google's Wallet API servers via `PATCH /walletobjects/v1/genericObject/{id}`.
-   - **The already-installed pass on the Android phone updates live without the user having to remove or re-add it.**
-4. **Interactive Studio Web Interface**:
-   - Real-time phone pass simulator with animated metric pulse effects.
-   - Official "Save to Google Wallet" button and scannable QR code.
-   - Remote control panel to trigger `POST /passes/{id}` and test the live update flow.
-   - Instant cURL snippet generator for command-line validation.
-   - Diagnostic status indicator and Google Wallet Issuer setup modal.
+   - Updates pass values and pushes changes directly to Google Wallet API via `PATCH /walletobjects/v1/genericObject/{id}`.
+   - Passes saved to Android devices update live without requiring re-saving.
+4. **Web Interface**:
+   - Live pass preview card with metric animation.
+   - Google Wallet save button and QR code.
+   - Control panel to trigger `POST /passes/{id}` and test updates.
+   - cURL snippet generator for API testing.
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```
                       +-------------------+
                       |   Client Web UI   |
                       +---------+---------+
                                 |
-                   REST API (HTTP / JSON)
+                    REST API (HTTP / JSON)
                                 |
                                 v
                       +-------------------+
@@ -40,7 +39,7 @@ A minimal full-stack web application that issues digital passes to Google Wallet
                                 |
                                 v
                       +-------------------+
-                      |    PassService    |  <-- Core Domain Logic (Wallet Agnostic)
+                      |    PassService    |  <-- Core Domain Logic
                       +---------+---------+
                                 |
             +-------------------+-------------------+
@@ -48,47 +47,45 @@ A minimal full-stack web application that issues digital passes to Google Wallet
             v                                       v
 +-----------------------+               +-----------------------+
 |  IPassRepository      |               |   IWalletProvider     |
-|  (File/Memory Store)  |               +-----------+-----------+
+|  (File Store)         |               +-----------+-----------+
 +-----------------------+                           |
                                +--------------------+--------------------+
                                |                                         |
                                v                                         v
                     +----------------------+                  +---------------------+
                     | GoogleWalletProvider |                  | MockWalletProvider  |
-                    | (Live Google API &   |                  | (Local Preview Mode)|
-                    |  Signed JWT Link)    |                  +---------------------+
-                    +----------+-----------+
+                    | (Live Google API)    |                  | (Local Preview Mode)|
+                    +----------+-----------+                  +---------------------+
                                |
-                   Google Wallet REST API
+                    Google Wallet REST API
                     (GenericClass / Object)
                                |
                                v
-               +-------------------------------+
-               | Android Google Wallet Device  |
-               | (Silent Push Sync & Update)   |
-               +-------------------------------+
+                +-------------------------------+
+                | Android Google Wallet Device  |
+                | (Push Sync & Update)          |
+                +-------------------------------+
 ```
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Install Dependencies
 ```bash
 npm install
 ```
 
-### 2. Configure Environment (Optional for Live Mode, or run directly in Demo Mode)
-Copy the example environment configuration:
+### 2. Configure Environment
 ```bash
 cp .env.example .env
 ```
 
-If you don't have Google Cloud credentials yet, the application will automatically launch in **Demo/Mock Mode**, allowing you to preview the UI, test the endpoints, and inspect the cURL commands.
+If Google Cloud credentials are not configured, the app starts in mock mode for local testing.
 
-To connect **Live Google Wallet**:
+To connect live Google Wallet:
 1. Place your Google Cloud Service Account JSON file at `credentials/service-account.json`.
-2. Edit `.env` and provide your 19-digit Google Wallet Issuer ID:
+2. Set your 19-digit Google Wallet Issuer ID in `.env`:
    ```env
    GOOGLE_WALLET_ISSUER_ID=3388000000022xxxxxx
    GOOGLE_WALLET_CLASS_ID=digital_balance_pass
@@ -97,101 +94,96 @@ To connect **Live Google Wallet**:
 
 ### 3. Run the Application
 ```bash
-# Development mode with hot-reloading
+# Development mode
 npm run dev
 
-# Or build & start production server
+# Production build and run
 npm run build
 npm start
 ```
 
-Open your browser at: **`http://localhost:3000`**
+Open `http://localhost:3001` in your browser.
 
 ---
 
-## 📱 Google Wallet Setup in Test Mode (Step-by-Step)
+## Google Wallet Setup (Test Mode)
 
-To test on your real Android phone:
+To test on an Android phone:
 
-1. **Access Google Pay & Wallet Console**:
-   - Go to [Google Pay & Wallet Business Console](https://pay.google.com/business/console).
-   - Set up an Issuer Account and note your **19-digit Issuer ID**.
-2. **Whitelist Your Android Account (Crucial for Test Mode)**:
-   - In the Google Pay & Wallet Console, go to **Google Wallet API > Users > Test Accounts**.
-   - Add the Google account email address that is currently signed in on your Android phone.
-   - *Note: In test mode, only whitelisted test accounts can save passes.*
-3. **Set Up Google Cloud Service Account**:
-   - Open [Google Cloud Console](https://console.cloud.google.com).
-   - Enable the **Google Wallet API** (`walletobjects.googleapis.com`).
-   - Create a Service Account and download its key as a JSON file.
-4. **Link Service Account to Google Wallet Console**:
-   - In Google Pay & Wallet Console under **Users**, add your service account email (e.g. `your-sa@project.iam.gserviceaccount.com`) as a **Developer** or **Admin**.
-5. **Add to Project**:
+1. **Google Pay & Wallet Console**:
+   - Open [Google Pay & Wallet Business Console](https://pay.google.com/business/console).
+   - Locate your 19-digit Issuer ID.
+2. **Whitelist Test Account**:
+   - In Google Pay & Wallet Console, navigate to **Google Wallet API > Users > Test Accounts**.
+   - Add the Google account email address active on the test Android device.
+3. **Google Cloud Service Account**:
+   - In Google Cloud Console, enable the **Google Wallet API** (`walletobjects.googleapis.com`).
+   - Create a Service Account and download its key JSON.
+4. **Grant Access**:
+   - Under **Users** in Google Pay & Wallet Console, add the Service Account email as **Developer** or **Admin**.
+5. **Project Credentials**:
    - Save the key file to `credentials/service-account.json`.
    - Update `GOOGLE_WALLET_ISSUER_ID` in `.env`.
 
 ---
 
-## 🧪 Testing the Live Update Flow
+## API Usage
 
-### Flow Example
+### Create Pass
+`POST /passes`
 
-1. **Create Pass**:
-   - Fill out the form in the web UI:
-     - Name: `John Doe`
-     - Label: `Balance`
-     - Number: `40`
-   - Click **Create Digital Pass**.
-   - Click **Save to Google Wallet** (or scan the QR code on your phone).
-   - The pass is added to your Android phone's Google Wallet showing:
-     - **John Doe**
-     - **Balance: 40**
-     - QR code with pass ID.
+Request:
+```json
+{
+  "name": "Alex Morgan",
+  "label": "Balance",
+  "value": 40
+}
+```
 
-2. **Trigger Live Update**:
-   - In the **Live Wallet Update** panel on the web page (or via terminal), enter `55` and click **Send Live Update (POST /passes/{id})**.
-   - Or run via terminal:
-     ```bash
-     curl -X POST http://localhost:3000/passes/<YOUR_PASS_ID> \
-       -H "Content-Type: application/json" \
-       -d '{"value": 55}'
-     ```
-   - **Response**:
-     ```json
-     {
-       "success": true,
-       "message": "Pass pass_... updated successfully. Live push sent to Google Wallet.",
-       "pass": {
-         "id": "pass_...",
-         "name": "John Doe",
-         "label": "Balance",
-         "value": 55,
-         "updatedAt": "2026-10-16T10:15:00.000Z"
-       }
-     }
-     ```
-   - Look at your Android phone: Google Wallet receives the push notification and updates the pass value to **`Balance: 55`** without needing to remove or re-add the pass!
+Response:
+```json
+{
+  "success": true,
+  "message": "Pass created successfully",
+  "pass": {
+    "id": "7K9P-4X2B",
+    "name": "Alex Morgan",
+    "label": "Balance",
+    "value": 40,
+    "saveUrl": "https://pay.google.com/gp/v/save/...",
+    "qrCodeDataUrl": "data:image/png;base64,...",
+    "walletProvider": "google_wallet",
+    "providerPassId": "3388000000023206263.7K9P-4X2B",
+    "createdAt": "2026-10-16T10:15:00.000Z",
+    "updatedAt": "2026-10-16T10:15:00.000Z"
+  }
+}
+```
 
----
+### Update Pass Live
+`POST /passes/:id` (also supports `PATCH` and `PUT`)
 
-## 🔌 Adding Future Wallet Providers
+Request:
+```bash
+curl -X POST http://localhost:3001/passes/7K9P-4X2B \
+  -H "Content-Type: application/json" \
+  -d '{"value": 55}'
+```
 
-To add a new provider (e.g., Apple Wallet):
+Response:
+```json
+{
+  "success": true,
+  "message": "Pass 7K9P-4X2B updated successfully",
+  "pass": {
+    "id": "7K9P-4X2B",
+    "name": "Alex Morgan",
+    "label": "Balance",
+    "value": 55,
+    "updatedAt": "2026-10-16T10:20:00.000Z"
+  }
+}
+```
 
-1. Implement `IWalletProvider` from `src/providers/wallet-provider.interface.ts`:
-   ```typescript
-   export class AppleWalletProvider implements IWalletProvider {
-     readonly providerName = 'apple_wallet';
-     readonly isMock = false;
-
-     async createPass(payload: CreateWalletPassPayload): Promise<WalletPassResult> {
-       // Generate .pkpass package signed with Apple WWDR certificate
-     }
-
-     async updatePass(payload: UpdateWalletPassPayload): Promise<void> {
-       // Send Apple Push Notification (APNs) to registered devices
-     }
-   }
-   ```
-2. Register the new provider in `src/providers/wallet-provider.factory.ts`.
-3. The core application logic (`PassService`) remains completely untouched!
+The saved pass in Google Wallet on Android updates automatically.

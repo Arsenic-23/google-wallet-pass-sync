@@ -4,17 +4,12 @@ import { PassController } from '../controllers/pass.controller.js';
 export function createPassRoutes(controller: PassController): Router {
   const router = Router();
 
-  // Core required endpoints
   router.post('/passes', controller.createPass);
   router.post('/passes/:id', controller.updatePass);
-
-  // Additional RESTful convenience methods
   router.patch('/passes/:id', controller.updatePass);
   router.put('/passes/:id', controller.updatePass);
   router.get('/passes/:id', controller.getPass);
   router.get('/passes', controller.listPasses);
-
-  // Status and health diagnostics
   router.get('/api/status', controller.getStatus);
 
   return router;

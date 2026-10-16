@@ -25,7 +25,7 @@ export class FilePassRepository implements IPassRepository {
           this.passes.set(pass.id, pass);
         }
       } catch (err) {
-        console.warn('⚠️ Could not load passes from disk, starting empty:', err);
+        console.warn('Could not load passes from disk:', err);
       }
     }
   }
@@ -35,7 +35,7 @@ export class FilePassRepository implements IPassRepository {
       const list = Array.from(this.passes.values());
       fs.writeFileSync(this.filePath, JSON.stringify(list, null, 2), 'utf-8');
     } catch (err) {
-      console.error('❌ Failed to persist passes to disk:', err);
+      console.error('Failed to persist passes to disk:', err);
     }
   }
 

@@ -17,8 +17,7 @@ export class MockWalletProvider implements IWalletProvider {
       ready: true,
       providerName: this.providerName,
       mode: 'mock',
-      details:
-        'Demo/Mock Mode active. Google Wallet credentials (ISSUER_ID or service-account.json) are not configured yet. Passes and live updates will be simulated locally.',
+      details: 'Mock provider active',
     };
   }
 
@@ -64,10 +63,6 @@ export class MockWalletProvider implements IWalletProvider {
       ...existing,
       value: payload.value,
     });
-
-    console.log(
-      `[MockWalletProvider] Live update simulated for pass ${payload.id}: ${payload.label} set to ${payload.value}`
-    );
   }
 
   async getPassDetails(id: string): Promise<any> {

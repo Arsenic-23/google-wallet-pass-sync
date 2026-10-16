@@ -65,7 +65,7 @@ export class GoogleWalletProvider implements IWalletProvider {
             mode: 'live',
             issuerId: this.issuerId,
             classId: this.classId,
-            details: `Google Wallet API authentication or permission error: ${err.message || err}`,
+            details: `Google Wallet API error: ${err.message || err}`,
           };
         }
       }
@@ -76,9 +76,7 @@ export class GoogleWalletProvider implements IWalletProvider {
         mode: 'live',
         issuerId: this.issuerId,
         classId: this.classId,
-        details: `Connected to Google Wallet API in test mode. Class status: ${
-          classExists ? 'Active' : 'Will be automatically initialized on first pass creation'
-        }`,
+        details: classExists ? 'Class active' : 'Class will initialize on first pass',
       };
     } catch (err: any) {
       return {
@@ -87,15 +85,11 @@ export class GoogleWalletProvider implements IWalletProvider {
         mode: 'live',
         issuerId: this.issuerId,
         classId: this.classId,
-        details: `Health check failed: ${err.message || err}`,
+        details: err.message || String(err),
       };
     }
   }
 
-  /**
-   * Ensures the generic pass class exists in Google Wallet Issuer account.
-   * If it doesn't exist, it creates it with template overrides for balance display.
-   */
   async ensureClassExists(): Promise<void> {
     if (this.classEnsured) return;
 
@@ -106,15 +100,13 @@ export class GoogleWalletProvider implements IWalletProvider {
         resourceId: fullClassId,
       });
       this.classEnsured = true;
-      console.log(`✅ Google Wallet GenericClass [${fullClassId}] already exists.`);
       return;
     } catch (err: any) {
       if (err?.code !== 404 && err?.status !== 404) {
-        console.warn(`⚠️ Warning inspecting GenericClass [${fullClassId}]:`, err?.message || err);
+        console.warn(`Class check [${fullClassId}]:`, err?.message || err);
       }
     }
 
-    console.log(`🔨 Creating Google Wallet GenericClass [${fullClassId}]...`);
     try {
       const classPayload: walletobjects_v1.Schema$GenericClass = {
         id: fullClassId,
@@ -152,22 +144,15 @@ export class GoogleWalletProvider implements IWalletProvider {
         requestBody: classPayload,
       });
       this.classEnsured = true;
-      console.log(`✅ Google Wallet GenericClass [${fullClassId}] successfully created.`);
     } catch (err: any) {
       if (err?.code === 409 || err?.status === 409) {
-        // Already exists
         this.classEnsured = true;
-        console.log(`ℹ️ Google Wallet GenericClass [${fullClassId}] already exists (conflict caught).`);
       } else {
-        console.error(`❌ Failed to create Google Wallet GenericClass [${fullClassId}]:`, err);
-        throw new Error(`Failed to create Google Wallet Class: ${err.message || err}`);
+        throw new Error(`Failed to create Google Wallet class: ${err.message || err}`);
       }
     }
   }
 
-  /**
-   * Creates a new Google Wallet pass object and returns the signed save link.
-   */
   async createPass(payload: CreateWalletPassPayload): Promise<WalletPassResult> {
     await this.ensureClassExists();
 
@@ -216,29 +201,23 @@ export class GoogleWalletProvider implements IWalletProvider {
       hexBackgroundColor: '#1a73e8',
     };
 
-    // Upsert into Google Wallet API
     try {
-      console.log(`📤 Inserting pass object [${fullObjectId}] via Google Wallet API...`);
       await this.walletClient.genericobject.insert({
         requestBody: genericObject,
       });
-      console.log(`✅ Google Wallet object [${fullObjectId}] inserted successfully.`);
     } catch (err: any) {
       if (err?.code === 409 || err?.status === 409) {
-        console.log(`ℹ️ Object [${fullObjectId}] already exists, updating...`);
         await this.walletClient.genericobject.update({
           resourceId: fullObjectId,
           requestBody: genericObject,
         });
       } else {
-        console.error(`❌ Google Wallet genericobject.insert error:`, err?.response?.data || err);
         throw new Error(
-          `Google Wallet API object creation failed: ${err?.response?.data?.error?.message || err.message}`
+          `Google Wallet API error: ${err?.response?.data?.error?.message || err.message}`
         );
       }
     }
 
-    // Generate signed JWT for "Save to Google Wallet" button
     const origins = [
       this.baseUrl,
       'http://localhost:3000',
@@ -266,14 +245,8 @@ export class GoogleWalletProvider implements IWalletProvider {
     };
   }
 
-  /**
-   * Updates an existing Google Wallet pass object live.
-   * Modifies the value and text modules, triggering push notification update on Android phone.
-   */
   async updatePass(payload: UpdateWalletPassPayload): Promise<void> {
     const fullObjectId = `${this.issuerId}.${payload.id}`;
-
-    console.log(`🔄 Updating Google Wallet pass [${fullObjectId}] with value: ${payload.value}...`);
 
     try {
       await this.walletClient.genericobject.patch({
@@ -299,12 +272,9 @@ export class GoogleWalletProvider implements IWalletProvider {
           ],
         },
       });
-
-      console.log(`🚀 Live update dispatched successfully to Google Wallet for [${fullObjectId}]!`);
     } catch (err: any) {
-      console.error(`❌ Google Wallet genericobject.patch failed:`, err?.response?.data || err);
       throw new Error(
-        `Failed to update pass on Google Wallet API: ${
+        `Failed to update Google Wallet pass: ${
           err?.response?.data?.error?.message || err.message
         }`
       );
