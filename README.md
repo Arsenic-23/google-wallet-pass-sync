@@ -9,6 +9,11 @@ A full-stack application that creates digital passes for Google Wallet and pushe
 - **Integration**: Google Wallet REST API (`googleapis`), `jsonwebtoken`, `qrcode`
 - **Deployment**: Docker, Docker Compose
 
+## Architecture & Extensibility
+
+The codebase uses a decoupled Provider Pattern. All core pass management, API routes, and data models are completely wallet-agnostic. Support for a second platform (such as Apple Wallet) can be plugged in by adding a new provider without modifying or rewriting any core business logic.
+
+
 ## Environment Variables
 
 Copy the example configuration:
